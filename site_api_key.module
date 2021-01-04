@@ -1,0 +1,47 @@
+<?php
+/**
+ * @file
+ * Configuration site API key from Basic site settings.
+ */
+
+ use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_alter().
+ */
+function site_api_key_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Alter Basic site setting from. 
+  if ($form_id == 'system_site_information_settings') { 
+  	$form['site_api_setting'] = array(
+      '#type' => 'details',
+      '#title' => t('Site API setting'),
+      '#open' => TRUE,
+    );
+    // Create a new field 'site api key'
+    $site_api_key = \Drupal::config('site_api_key.configuration')->get('siteapikey');
+
+ 		$form['site_api_setting']['site_api_key'] = array(
+    	'#type' => 'textfield',
+      '#title' => t('Site API key'),
+      '#default_value' => $site_api_key,
+    );
+    // Change button label. 
+    $form['actions']['submit']['#value'] = t('Update Configuration');
+    // Add custom submit handler for Basic site setting form.
+    $form['actions']['submit']['#submit'][] = 'site_api_key_system_site_information_settings_form_submit_handler';
+  }
+}
+
+/**
+ * Submit handler to store 'site api key' value 
+ */
+function site_api_key_system_site_information_settings_form_submit_handler($form, FormStateInterface $form_state) {
+	$site_api_key = $form_state->getValue(array('site_api_key'));
+  // If site api key is not empty store new API key else store as deafult variable.
+  $site_api_key = !(empty($site_api_key)) ? $site_api_key : 'No API Key yet';
+
+  $config = \Drupal::configFactory()->getEditable('site_api_key.configuration');
+  $config->set('siteapikey', $site_api_key);
+  $config->save();
+	drupal_set_message(t('Site API Key with value \'@site_api_key\' has been saved', array('@site_api_key' => $site_api_key)));
+}

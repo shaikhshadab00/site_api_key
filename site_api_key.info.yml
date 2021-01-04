@@ -1,0 +1,5 @@
+name: Site API Key
+type: module
+description: 'configuration Site API Key to view node'
+package: Custom
+core: 8.x
